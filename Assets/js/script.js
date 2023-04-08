@@ -1,77 +1,162 @@
-const allSideMenu = document.querySelectorAll('#sidebar .side-menu.top li a');
+// function to validate input value beforr Submit 
+function validateForm() {
+  var name = document.getElementById('name').value;
+  var age = document.getElementById('age').value;
+  var address = document.getElementById('address').value;
+  var email = document.getElementById('email').value;
 
-allSideMenu.forEach(item=> {
-	const li = item.parentElement;
+  if (name == ""){
+    alert("Name is required")
+    return false;
+  }
 
-	item.addEventListener('click', function () {
-		allSideMenu.forEach(i=> {
-			i.parentElement.classList.remove('active');
-		})
-		li.classList.add('active');
-	})
-});
+  if ( age == ""){
+    alert("Age is required")
+    return false;
+  }
+  else if(age < 1){
+    alert("Age must not be zero or less than zero")
+  }
 
-// TOGGLE SIDEBAR
-const menuBar = document.querySelector('#content nav .bx.bx-menu');
-const sidebar = document.getElementById('sidebar');
+  if ( address == ""){
+    alert("Address is required")
+    return false;
+  }
 
-menuBar.addEventListener('click', function () {
-	sidebar.classList.toggle('hide');
-})
-const searchButton = document.querySelector('#content nav form .form-input button');
-const searchButtonIcon = document.querySelector('#content nav form .form-input button .bx');
-const searchForm = document.querySelector('#content nav form');
+  if ( email == ""){
+    alert("Email is required")
+    return false;
+  }
+  else if(!email.includes("@")){
+    alert("Invalid email address")
+    return false;
+  }
 
-searchButton.addEventListener('click', function (e) {
-	if(window.innerWidth < 576) {
-		e.preventDefault();
-		searchForm.classList.toggle('show');
-		if(searchForm.classList.contains('show')) {
-			searchButtonIcon.classList.replace('bx-search', 'bx-x');
-		} else {
-			searchButtonIcon.classList.replace('bx-x', 'bx-search');
-		}
-	}
-})
+  return true;
+}
+// function to show data
+function showData() {
+  var employeeList;
+  if (localStorage.getItem("employeeList") == null) {
+    employeeList = [];
+  }
+  else {
+    employeeList = JSON.parse(localStorage.getItem("employeeList"))
+    if (!Array.isArray(employeeList)) {
+      employeeList = [];
+    }
+  }
 
-if(window.innerWidth < 768) {
-	sidebar.classList.add('hide');
-} else if(window.innerWidth > 576) {
-	searchButtonIcon.classList.replace('bx-x', 'bx-search');
-	searchForm.classList.remove('show');
+  var html = "";
+
+  employeeList.forEach(function (element, index){
+    html += "<tr>";
+    html += "<td>" + element.name + "</td>";
+    html += "<td>" + element.age + "</td>";
+    html += "<td>" + element.address + "</td>";
+    html += "<td>" + element.email + "</td>";
+    html += '<td><button onclick="deleteData(' + index +')" class = "btn btn-danger">Delete</button><button onclick="updateData(' + index + ')" class = "btn btn-warning m-2">Edit</button> </td>'
+    html += "</tr>";console.log(index)
+  });
+  
+  document.querySelector("#crudTable tbody").innerHTML = html;
 }
 
-window.addEventListener('resize', function () {
-	if(this.innerWidth > 576) {
-		searchButtonIcon.classList.replace('bx-x', 'bx-search');
-		searchForm.classList.remove('show');
-	}
-})
+// Loads all data when document or page loaded
+document.onload = showData();
 
-const switchMode = document.getElementById('switch-mode');
+// function to add data
+function AddData(){
+  // if form in validate
+  if(validateForm() == true){
+    var name = document.getElementById('name').value;
+    var age = document.getElementById('age').value;
+    var address = document.getElementById('address').value;
+    var email = document.getElementById('email').value;
 
-switchMode.addEventListener('change', function () {
-	if(this.checked) {
-		document.body.classList.add('dark');
-	} else {
-		document.body.classList.remove('dark');
-	}
-})
+    var employeeList;
+    if (localStorage.getItem("employeeList") == null) {
+      employeeList = [];
+    }
+    else {
+      employeeList = JSON.parse(localStorage.getItem("employeeList"))
+      if (!Array.isArray(employeeList)) {
+        employeeList = [];
+      }
+    }
 
-const $ = document.querySelector.bind(document)
-const $$ = document.querySelectorAll.bind(document)
+    employeeList.push(
+      {name: name,
+      age: age,
+      address: address,
+      email: email
+      }
+    );
+    localStorage.setItem("employeeList", JSON.stringify(employeeList));
+    showData();
+    document.getElementById("name").value = "";
+    document.getElementById("age").value = "";
+    document.getElementById("address").value = "";
+    document.getElementById("email").value = "";
+  }
+}
 
-const tabs = $$('.tab-item')
-const panes = $$('.tab-pane')
+// function delete employee
+function deleteData(index) {
+  var employeeList;
+    if (localStorage.getItem("employeeList") == null) {
+      employeeList = [];
+    }
+    else {
+      employeeList = JSON.parse(localStorage.getItem("employeeList"))
+      if (!Array.isArray(employeeList)) {
+        employeeList = [];
+      }
+    }
+  employeeList.splice(index, 1);
+  localStorage.setItem("employeeList", JSON.stringify(employeeList));
+  showData();
+}
 
-tabs.forEach((tab,index) => {
-	const pane = panes[index]
+// function to update/edit employee
+function updateData(index) {
+  document.getElementById("Submit").style.display = "none";
+  document.getElementById("Update").style.display = "block";
 
-	tab.onclick = function () {
-		$('.tab-item.active').classList.remove('active')
-		$('.tab-pane.active').classList.remove('active')
+  var employeeList;
+    if (localStorage.getItem("employeeList") == null) {
+      employeeList = [];
+    }
+    else {
+      employeeList = JSON.parse(localStorage.getItem("employeeList"))
+      if (!Array.isArray(employeeList)) {
+        employeeList = [];
+      }
+    }
 
-		this.classList.add('active')
-		pane.classList.add('active')
-	}
-})
+    document.getElementById("name").value = employeeList[index].name;
+    document.getElementById("age").value = employeeList[index].age;
+    document.getElementById("address").value = employeeList[index].address;
+    document.getElementById("email").value = employeeList[index].email;
+
+    document.querySelector("#Update").onclick = function() {
+      if(validateForm() == true){
+        employeeList[index].name = document.getElementById("name").value;
+        employeeList[index].age = document.getElementById("age").value;
+        employeeList[index].address = document.getElementById("address").value;
+        employeeList[index].email = document.getElementById("email").value;
+        
+      localStorage.setItem("employeeList", JSON.stringify(employeeList));
+
+      showData();
+
+      document.getElementById("name").value = "";
+      document.getElementById("age").value = "";
+      document.getElementById("address").value = "";
+      document.getElementById("email").value = "";
+
+      document.getElementById("Submit").style.display = "block";
+      document.getElementById("Update").style.display = "none";
+      }
+    }
+}
