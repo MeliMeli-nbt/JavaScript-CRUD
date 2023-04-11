@@ -1,5 +1,6 @@
 function SignUp() {
-  var username = document.getElementById('username').value;
+  var email = document.getElementById('email').value;
+  // var username = document.getElementById('username').value;
   var password = document.getElementById('password').value;
   var confirmPassword = document.getElementById('cfpassword').value;
   var role = document.getElementById('role').value;
@@ -8,33 +9,33 @@ function SignUp() {
   }
   else {
     var user = {
-      username: username,
+      email: email,
+      // username: username,
       password: password,
       role: role
     };
 
-    localStorage.setItem(username, JSON.stringify(user));
-    console.log('user saved')
+    localStorage.setItem(email, JSON.stringify(user));
     window.location.href = "/login.html"
   }
 }
 
 function Login() {
-  var username = document.getElementById('username').value;
+  var email = document.getElementById('email').value;
   var pass = document.getElementById('password').value;
   var result = document.getElementById('result');
 
-  var user = localStorage.getItem(username);
-  var data = JSON.parse(user);
+  var emailLogin = localStorage.getItem(email);
+  var data = JSON.parse(emailLogin);
 
-  if (user == null) {
+  if (email == null) {
     result.innerHTML = 'Wrong username';
-  } else if (username == data.username &&  pass == data.password) {
+  } else if (email == data.email &&  pass == data.password) {
     if (data.role == 'admin') {
-      localStorage.setItem("username", data.username)
+      localStorage.setItem("email", data.email);
     }
     else if (data.role == 'user') {
-      localStorage.setItem("username", data.username)
+      localStorage.setItem("email", data.email)
     }
     result.innerHTML = 'logged in';
     window.location.href = '/index.html';
