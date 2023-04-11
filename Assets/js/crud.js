@@ -36,29 +36,30 @@ function validateForm() {
 }
 // function to show data
 function showData() {
+  var username = localStorage.getItem('username');
+  var data = localStorage.getItem(username);
   var employeeList;
-  if (localStorage.getItem("employeeList") == null) {
-    employeeList = [];
+  if (data.employeeList == null) {
+    data.employeeList = [];
+    console.log(data)
   }
   else {
-    employeeList = JSON.parse(localStorage.getItem("employeeList"))
+    data.employeeList = JSON.parse(localStorage.getItem("employeeList"))
     if (!Array.isArray(employeeList)) {
-      employeeList = [];
+      data.employeeList = [];
     }
   }
 
   var html = "";
-
-  employeeList.forEach(function (element, index){
+  data.employeeList.forEach(function (element, index){
     html += "<tr>";
     html += "<td>" + element.name + "</td>";
     html += "<td>" + element.age + "</td>";
     html += "<td>" + element.address + "</td>";
     html += "<td>" + element.email + "</td>";
-    html += '<td><button onclick="deleteData(' + index +')" class = "btn btn-danger">Delete</button><button onclick="updateData(' + index + ')" class = "btn btn-warning m-2">Edit</button> </td>'
+    html += '<td><button onclick="deleteData(' + index +')" class = "btn btn-danger" id = "Delete" >Delete</button><button onclick="updateData(' + index + ')" class = "btn btn-warning m-2 id = "Edit">Edit</button> </td>'
     html += "</tr>";console.log(index)
   });
-  
   document.querySelector("#crudTable tbody").innerHTML = html;
 }
 
