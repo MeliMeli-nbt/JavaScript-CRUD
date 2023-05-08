@@ -34,16 +34,6 @@ function validateForm() {
 }
 // function to show data
 function showDataAdmin() {
-  // var employeeList;
-  // if (employeeList == null) {
-  //   employeeList = [];
-  // }
-  // else {
-  //   employeeList = JSON.parse(localStorage.getItem('employeeList'))
-  // if (!Array.isArray(employeeList)) {
-  //   employeeList = [];
-  // }
-  // }
   var employeeList;
   if (localStorage.getItem("employeeList") == null) {
     employeeList = [];
