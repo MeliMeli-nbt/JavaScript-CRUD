@@ -35,10 +35,10 @@ function validateForm() {
 // function to show data
 function showDataAdmin() {
   var employeeList;
-  if (localStorage.getItem("employeeList") == null) {
+  if (localStorage.getItem("CRUD_listEmployees") == null) {
     employeeList = [];
   } else {
-    employeeList = JSON.parse(localStorage.getItem("employeeList"));
+    employeeList = JSON.parse(localStorage.getItem("CRUD_listEmployees"));
     if (!Array.isArray(employeeList)) {
       employeeList = [];
     }
@@ -55,7 +55,7 @@ function showDataAdmin() {
       index +
       ')" class = "btn btn-danger" id = "Delete" >Delete</button><button onclick="updateData(' +
       index +
-      ')" class = "btn btn-warning m-2 id = "Edit">Edit</button> </td>';
+      ')" class = "btn btn-warning m-2 id = "Edit">Edit</button></td>';
     html += "</tr>";
   });
   document.querySelector("#crudTable tbody").innerHTML = html;
@@ -63,18 +63,18 @@ function showDataAdmin() {
 
 function showDataUser() {
   var employeeList;
-  if (localStorage.getItem("employeeList") == null) {
+  if (localStorage.getItem("CRUD_listEmployees") == null) {
     employeeList = [];
   } else {
-    employeeList = JSON.parse(localStorage.getItem("employeeList"));
+    employeeList = JSON.parse(localStorage.getItem("CRUD_listEmployees"));
     if (!Array.isArray(employeeList)) {
       employeeList = [];
     }
   }
-  var email = localStorage.getItem("email");
+  let user = JSON.parse(localStorage.getItem("CRUD_currentUser"));
   var html = "";
   employeeList.forEach(function (element, index) {
-    if (element.email == email) {
+    if (element.email == user.email) {
       html += "<tr>";
       html += "<td>" + element.name + "</td>";
       html += "<td>" + element.age + "</td>";
@@ -90,25 +90,28 @@ function showDataUser() {
   document.querySelector("#crudTable tbody").innerHTML = html;
 }
 function run() {
-  var email = localStorage.getItem("email");
-  var data = JSON.parse(localStorage.getItem(email));
-  // Loads all data when document or page loaded
-  if (data.role == "admin") {
-    document.onload = showDataAdmin();
-    document.getElementById("Submit").style.display = "block";
-  } else if (data.role == "user") {
-    document.onload = showDataUser();
-  }
+  let user = JSON.parse(localStorage.getItem("CRUD_currentUser"));
+  window.addEventListener('load', function() {
+    if (user && user.role == "admin") {
+      showDataAdmin(); 
+      document.getElementById("Submit").style.display = "block";
+      document.getElementById("Account").style.display = "block";
+    } else if (user && user.role == "user") {
+      showDataUser(); 
+    }
+  });
 }
+
 run();
 
+
+
 function checkRole() {
-  var email = localStorage.getItem("email");
-  var data = JSON.parse(localStorage.getItem(email));
+  let user = JSON.parse(localStorage.getItem("CRUD_currentUser"));
   // Loads all data when document or page loaded
-  if (data.role == "admin") {
+  if (user && user.role == "admin") {
     showDataAdmin();
-  } else if (data.role == "user") {
+  } else if (user && user.role == "user") {
     showDataUser();
   }
 }
@@ -124,10 +127,10 @@ function AddData() {
     var email = document.getElementById("email").value;
 
     var employeeList;
-    if (localStorage.getItem("employeeList") == null) {
+    if (localStorage.getItem("CRUD_listEmployees") == null) {
       employeeList = [];
     } else {
-      employeeList = JSON.parse(localStorage.getItem("employeeList"));
+      employeeList = JSON.parse(localStorage.getItem("CRUD_listEmployees"));
       if (!Array.isArray(employeeList)) {
         employeeList = [];
       }
@@ -140,7 +143,7 @@ function AddData() {
       email: email,
       username: username,
     });
-    localStorage.setItem("employeeList", JSON.stringify(employeeList));
+    localStorage.setItem("CRUD_listEmployees", JSON.stringify(employeeList));
     checkRole();
     document.getElementById("name").value = "";
     document.getElementById("age").value = "";
@@ -152,16 +155,16 @@ function AddData() {
 // function delete employee
 function deleteData(index) {
   var employeeList;
-  if (localStorage.getItem("employeeList") == null) {
+  if (localStorage.getItem("CRUD_listEmployees") == null) {
     employeeList = [];
   } else {
-    employeeList = JSON.parse(localStorage.getItem("employeeList"));
+    employeeList = JSON.parse(localStorage.getItem("CRUD_listEmployees"));
     if (!Array.isArray(employeeList)) {
       employeeList = [];
     }
   }
   employeeList.splice(index, 1);
-  localStorage.setItem("employeeList", JSON.stringify(employeeList));
+  localStorage.setItem("CRUD_listEmployees", JSON.stringify(employeeList));
   checkRole();
 }
 
@@ -171,10 +174,10 @@ function updateData(index) {
   document.getElementById("Update").style.display = "block";
 
   var employeeList;
-  if (localStorage.getItem("employeeList") == null) {
+  if (localStorage.getItem("CRUD_listEmployees") == null) {
     employeeList = [];
   } else {
-    employeeList = JSON.parse(localStorage.getItem("employeeList"));
+    employeeList = JSON.parse(localStorage.getItem("CRUD_listEmployees"));
     if (!Array.isArray(employeeList)) {
       employeeList = [];
     }
@@ -192,7 +195,7 @@ function updateData(index) {
       employeeList[index].address = document.getElementById("address").value;
       employeeList[index].email = document.getElementById("email").value;
 
-      localStorage.setItem("employeeList", JSON.stringify(employeeList));
+      localStorage.setItem("CRUD_listEmployees", JSON.stringify(employeeList));
 
       checkRole();
 
@@ -207,7 +210,60 @@ function updateData(index) {
   };
 }
 
+function changePassword() {
+  document.getElementById('fromChangePassword').style.display = "block";
+}
+
+async function sha256(message) {
+  const msgBuffer = new TextEncoder().encode(message);          
+
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+
+  return hashHex;
+}
+
+async function UpdatePassword() {
+  var crPassword = document.getElementById('CrPassword').value;
+  var nPassword = document.getElementById('NewPassword').value;
+  var cfnPassword = document.getElementById('CfNewPassword').value;
+  var crUser =  JSON.parse(localStorage.getItem('CRUD_currentUser'));
+
+  var users =  JSON.parse(localStorage.getItem('CRUD_listUsers'));
+  var userIndex = users.findIndex(function(u) {
+    return u.email === crUser.email;
+  });
+  const crHashPass = await sha256(crPassword);
+  if (crHashPass !== crUser.password){
+    alert('Current password is incorrect');
+  }
+  else if (crPassword == null || cfnPassword == null || nPassword == null) {
+    alert('Password is incorrect')
+  }
+  else if (nPassword !== cfnPassword) {
+    alert('Confirm Password is incorrect')
+  }
+  else if (nPassword === cfnPassword ) {
+    // generate the new hashed password
+    const hashedPassword = await sha256(nPassword);
+
+    // update the user object's password property
+    users[userIndex].password = hashedPassword;
+
+    // save the updated list of users back to local storage
+    localStorage.setItem('CRUD_listUsers', JSON.stringify(users));
+
+    alert('Password updated successfully. Please log in again');
+
+    Logout();
+  }
+}
+
+
+
 function Logout() {
-  localStorage.removeItem("email");
-  window.location.href = "/login.html";
+  localStorage.removeItem("CRUD_currentUser");
+  window.location.href = "/index.html";
 }

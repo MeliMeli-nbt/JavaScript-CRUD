@@ -1,45 +1,33 @@
-function SignUp() {
-  var email = document.getElementById('email').value;
-  // var username = document.getElementById('username').value;
-  var password = document.getElementById('password').value;
-  var confirmPassword = document.getElementById('cfpassword').value;
-  var role = document.getElementById('role').value;
-  if ( password == null || password !== confirmPassword ){
-    alert('Password or confirm password is error');
-  }
-  else {
-    var user = {
-      email: email,
-      // username: username,
-      password: password,
-      role: role
-    };
+async function sha256(message) {
+  const msgBuffer = new TextEncoder().encode(message);          
 
-    localStorage.setItem(email, JSON.stringify(user));
-    window.location.href = "/login.html"
-  }
+  const hashBuffer = await crypto.subtle.digest('SHA-256', msgBuffer);
+
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => ('00' + b.toString(16)).slice(-2)).join('');
+
+  return hashHex;
 }
-
-function Login() {
+async function Login() {
   var email = document.getElementById('email').value;
-  var pass = document.getElementById('password').value;
+  var password = document.getElementById('password').value;
   var result = document.getElementById('result');
 
-  var emailLogin = localStorage.getItem(email);
-  var data = JSON.parse(emailLogin);
+  const hashedPassword = await sha256(password);
 
-  if (email == null) {
+  var users =  JSON.parse(localStorage.getItem('CRUD_listUsers'));
+  var user = users.find(function(u) {
+    return u.email === email;
+  });
+
+  if (!user) {
     result.innerHTML = 'Wrong username';
-  } else if (email == data.email &&  pass == data.password) {
-    if (data.role == 'admin') {
-      localStorage.setItem("email", data.email);
-    }
-    else if (data.role == 'user') {
-      localStorage.setItem("email", data.email)
-    }
-    result.innerHTML = 'logged in';
-    window.location.href = '/index.html';
+  } else if (hashedPassword == user.password) {
+    localStorage.setItem('CRUD_currentUser', JSON.stringify(user));
+    result.innerHTML = 'Logged in';
+    window.location.href = '/board.html';
   } else {
     result.innerHTML = 'Wrong password';
   }
 }
+

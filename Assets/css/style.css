@@ -13,3 +13,11 @@ body{
 #Submit {
   display: none;
 }
+
+#Account {
+  display: none;
+}
+
+#fromChangePassword {
+  display: none;
+}
